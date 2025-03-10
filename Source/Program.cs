@@ -1,2 +1,1 @@
-﻿Console.WriteLine("Hello, World!");
-Console.ReadLine();
+﻿vcesario.Phonebook.MainApplication.Run();
