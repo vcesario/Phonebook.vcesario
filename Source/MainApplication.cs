@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Spectre.Console;
 
 namespace vcesario.Phonebook;
@@ -9,11 +11,14 @@ public static class MainApplication
         SendMail,
         SendSms,
         ManageContacts,
+        TestConnection,
         Exit,
     }
 
-    public static void Run()
+    public static async Task Run()
     {
+        DataService.Initialize();
+
         MenuOption chosenOption;
         do
         {
@@ -30,6 +35,10 @@ public static class MainApplication
 
             switch (chosenOption)
             {
+                case MenuOption.TestConnection:
+                    await TestConnection();
+                    Console.ReadLine();
+                    break;
                 case MenuOption.Exit:
                     break;
                 default:
@@ -39,5 +48,14 @@ public static class MainApplication
             }
         }
         while (chosenOption != MenuOption.Exit);
+    }
+
+    private static async Task TestConnection()
+    {
+        using (var db = new PhonebookContext())
+        {
+            var any = await db.Contacts.OrderBy(c => c.Id).FirstAsync();
+            Console.WriteLine(any);
+        }
     }
 }

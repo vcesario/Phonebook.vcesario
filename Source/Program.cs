@@ -1,1 +1,1 @@
-﻿vcesario.Phonebook.MainApplication.Run();
+﻿await vcesario.Phonebook.MainApplication.Run();
