@@ -1,0 +1,5 @@
+{
+    "dotnet.defaultSolution": "Phonebook.sln",
+    "debug.console.closeOnEnd": true,
+    "csharp.debug.console": "externalTerminal"
+}
