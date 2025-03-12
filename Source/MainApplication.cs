@@ -11,11 +11,10 @@ public static class MainApplication
         SendMail,
         SendSms,
         ManageContacts,
-        TestConnection,
         Exit,
     }
 
-    public static async Task Run()
+    public static void Run()
     {
         DataService.Initialize();
 
@@ -31,13 +30,13 @@ public static class MainApplication
                new SelectionPrompt<MenuOption>()
                .Title(AppTexts.PROMPT_ACTION)
                .AddChoices(Enum.GetValues<MenuOption>())
+               .UseConverter(ConvertMenuOption)
            );
 
             switch (chosenOption)
             {
-                case MenuOption.TestConnection:
-                    await TestConnection();
-                    Console.ReadLine();
+                case MenuOption.ManageContacts:
+                    new ContactManager().Open();
                     break;
                 case MenuOption.Exit:
                     break;
@@ -50,12 +49,15 @@ public static class MainApplication
         while (chosenOption != MenuOption.Exit);
     }
 
-    private static async Task TestConnection()
+    private static string ConvertMenuOption(MenuOption option)
     {
-        using (var db = new PhonebookContext())
+        switch (option)
         {
-            var any = await db.Contacts.OrderBy(c => c.Id).FirstAsync();
-            Console.WriteLine(any);
+            case MenuOption.SendMail: return AppTexts.MENUOPTION_SENDMAIL;
+            case MenuOption.SendSms: return AppTexts.MENUOPTION_SENDSMS;
+            case MenuOption.ManageContacts: return AppTexts.MENUOPTION_MANAGECONTACTS;
+            case MenuOption.Exit: return AppTexts.MENUOPTION_EXIT;
+            default: return option.ToString();
         }
     }
 }

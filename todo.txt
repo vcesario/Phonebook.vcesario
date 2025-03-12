@@ -1,5 +1,5 @@
 - [x] Main Menu: Send mail, Send SMS, Manage contacts, Exit
-- [] Setup EF + SQL Server, create Contacts table
+- [x] Setup EF + SQL Server, create Contacts table
 - [] Create contact
 - [] Remove contact
 - [] Edit contact
