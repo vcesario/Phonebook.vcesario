@@ -1,4 +1,7 @@
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Spectre.Console;
+using vcesario.Flashcards;
 
 namespace vcesario.Phonebook;
 
@@ -12,14 +15,14 @@ public class ContactManager
         Return,
     }
 
-    public void Open()
+    public async Task Open()
     {
         MenuOption chosenOption;
         do
         {
             Console.Clear();
 
-            Console.WriteLine("Manage contacts");
+            Console.WriteLine(AppTexts.MENUOPTION_MANAGECONTACTS);
 
             Console.WriteLine();
             chosenOption = AnsiConsole.Prompt(
@@ -32,7 +35,7 @@ public class ContactManager
             switch (chosenOption)
             {
                 case MenuOption.CreateContact:
-                    CreateContact();
+                    await CreateContact();
                     break;
                 case MenuOption.Return:
                     break;
@@ -45,21 +48,63 @@ public class ContactManager
         while (chosenOption != MenuOption.Return);
     }
 
-    private void CreateContact()
+    private async Task CreateContact()
     {
         Console.Clear();
         Console.WriteLine(AppTexts.MENUOPTION_CREATECONTACT);
-        AnsiConsole.MarkupLine("[grey]Enter '.' anywhere to cancel.[/]");
-        Console.WriteLine();
-        var name = AnsiConsole.Prompt(new TextPrompt<string>("Name your contact:"));
+        AnsiConsole.MarkupLine($"[grey]{AppTexts.TOOLTIP_CANCEL}[/]");
 
+        var validator = new UserInputValidator();
+
+        Console.WriteLine();
+        var name = AnsiConsole.Prompt(
+            new TextPrompt<string>(AppTexts.CREATECONTACT_PROMPT_NAME)
+            .Validate(validator.ValidateUniqueNameOrPeriod));
         if (name.Equals("."))
         {
             return;
         }
 
-        Console.WriteLine("Contact added.");
-        Console.ReadLine();
+        var phone = AnsiConsole.Prompt(
+            new TextPrompt<string>(AppTexts.CREATECONTACT_PROMPT_PHONE)
+            .Validate(validator.ValidatePhoneNumberOrPeriod));
+        if (phone.Equals("."))
+        {
+            return;
+        }
+
+        var email = AnsiConsole.Prompt(
+            new TextPrompt<string>(AppTexts.CREATECONTACT_PROMPT_EMAIL)
+            {
+                AllowEmpty = true
+            }
+            .Validate(validator.ValidateEmailEmptyOrPeriod));
+        if (email.Equals("."))
+        {
+            return;
+        }
+
+        using (var dbContext = new PhonebookContext())
+        {
+            try
+            {
+                dbContext.Add(new Contact()
+                {
+                    Name = name,
+                    PhoneNumber = phone,
+                    Email = email
+                });
+                await dbContext.SaveChangesAsync();
+
+                Console.WriteLine(AppTexts.CREATECONTACT_LOG_CONTACTADDED);
+                Console.ReadLine();
+            }
+            catch (DbUpdateException ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                Console.ReadLine();
+            }
+        }
     }
 
     private string ConvertMenuOption(MenuOption option)

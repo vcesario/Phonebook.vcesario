@@ -14,7 +14,7 @@ public static class MainApplication
         Exit,
     }
 
-    public static void Run()
+    public static async Task Run()
     {
         DataService.Initialize();
 
@@ -36,7 +36,7 @@ public static class MainApplication
             switch (chosenOption)
             {
                 case MenuOption.ManageContacts:
-                    new ContactManager().Open();
+                    await new ContactManager().Open();
                     break;
                 case MenuOption.Exit:
                     break;
