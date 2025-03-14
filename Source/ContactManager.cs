@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Spectre.Console;
 using vcesario.Flashcards;
@@ -36,6 +35,9 @@ public class ContactManager
             {
                 case MenuOption.CreateContact:
                     await CreateContact();
+                    break;
+                case MenuOption.RemoveContact:
+                    await RemoveContact();
                     break;
                 case MenuOption.Return:
                     break;
@@ -96,7 +98,7 @@ public class ContactManager
                 });
                 await dbContext.SaveChangesAsync();
 
-                Console.WriteLine(AppTexts.CREATECONTACT_LOG_CONTACTADDED);
+                Console.WriteLine(AppTexts.CREATECONTACT_LOG_ADDED);
                 Console.ReadLine();
             }
             catch (DbUpdateException ex)
@@ -105,6 +107,97 @@ public class ContactManager
                 Console.ReadLine();
             }
         }
+    }
+
+    private async Task RemoveContact()
+    {
+        Console.Clear();
+        Console.WriteLine(AppTexts.MENUOPTION_REMOVECONTACT);
+
+        List<Contact> contacts;
+        using (var dbContext = new PhonebookContext())
+        {
+            try
+            {
+                contacts = await dbContext.Contacts.OrderBy(c => c.Id).ToListAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                Console.ReadLine();
+                return;
+            }
+        }
+
+        do
+        {
+            Console.Clear();
+            Console.WriteLine(AppTexts.MENUOPTION_REMOVECONTACT);
+
+            var prompt = new SelectionPrompt<Contact>()
+                .Title(AppTexts.REMOVECONTACT_PROMPT_SELECT)
+                .AddChoices(contacts)
+                .UseConverter(c => c.Name);
+            prompt.AddChoice(new Contact() { Id = -1, Name = AppTexts.MENUOPTION_RETURN });
+
+            Console.WriteLine();
+            var contact = AnsiConsole.Prompt(prompt);
+            if (contact.Id == -1)
+            {
+                return;
+            }
+
+            AnsiConsole.MarkupLine(string.Format(AppTexts.REMOVECONTACT_FIELD_NAME, $"[gold3_1]{contact.Name}[/]"));
+            AnsiConsole.MarkupLine(string.Format(AppTexts.REMOVECONTACT_FIELD_PHONE, $"[gold3_1]{contact.PhoneNumber}[/]"));
+            if (!string.IsNullOrEmpty(contact.Email))
+            {
+                AnsiConsole.MarkupLine(string.Format(AppTexts.REMOVECONTACT_FIELD_EMAIL, $"[gold3_1]{contact.Email}[/]"));
+            }
+
+            Console.WriteLine();
+            var confirm = AnsiConsole.Prompt(
+                new ConfirmationPrompt(AppTexts.REMOVECONTACT_PROMPT_REMOVE)
+                {
+                    DefaultValue = false
+                });
+
+            if (!confirm)
+            {
+                continue;
+            }
+
+            confirm = AnsiConsole.Prompt(
+                new ConfirmationPrompt(AppTexts.PROMPT_RECONFIRM)
+                {
+                    DefaultValue = false
+                });
+
+            if (!confirm)
+            {
+                continue;
+            }
+
+            using (var dbContext = new PhonebookContext())
+            {
+                try
+                {
+                    dbContext.Remove(contact);
+                    await dbContext.SaveChangesAsync();
+
+                    contacts.Remove(contact);
+
+                    Console.WriteLine();
+                    Console.WriteLine(AppTexts.REMOVECONTACT_LOG_REMOVED);
+                    Console.ReadLine();
+                }
+                catch (DbUpdateException ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                    Console.ReadLine();
+                }
+            }
+        }
+        while (true);
     }
 
     private string ConvertMenuOption(MenuOption option)
