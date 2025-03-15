@@ -5,19 +5,22 @@ public static class AppTexts
     public const string APP_TITLE = "===== PHONEBOOK =====";
     public const string TOOLTIP_CANCEL = "Enter '.' anywhere to cancel.";
     public const string TOOLTIP_KEEP = "Leave field blank to keep it";
-    public const string FIELD_NAME = "Name:\t{0}";
-    public const string FIELD_PHONE = "Phone:\t{0}";
-    public const string FIELD_EMAIL = "E-mail:\t{0}";
+    public const string FIELD_NAME = "Name:\t\t{0}";
+    public const string FIELD_PHONE = "Phone:\t\t{0}";
+    public const string FIELD_EMAIL = "E-mail:\t\t{0}";
+    public const string FIELD_CATEGORY = "Category:\t{0}";
 
     public const string CREATECONTACT_PROMPT_NAME = "Name your contact:";
     public const string CREATECONTACT_PROMPT_PHONE = "Enter phone number:";
     public const string CREATECONTACT_PROMPT_EMAIL = "Enter e-mail address [grey](optional)[/]:";
+    public const string CREATECONTACT_PROMPT_CATEGORY = "Choose a contact category:";
     public const string CREATECONTACT_LOG_ADDED = "Contact added.";
     
     public const string EDITCONTACT_PROMPT_SELECT = "Which contact do you want to edit?";
     public const string EDITCONTACT_PROMPT_NEWNAME = "Enter new name:";
     public const string EDITCONTACT_PROMPT_NEWPHONE = "Enter new phone number:";
     public const string EDITCONTACT_PROMPT_NEWEMAIL = "Enter new e-mail address:";
+    public const string EDITCONTACT_PROMPT_NEWCATEGORY = "Choose a new contact category:";
     public const string EDITCONTACT_LOG_UPDATED = "Contact updated.";
 
     public const string REMOVECONTACT_PROMPT_SELECT = "Which contact do you want to remove?";

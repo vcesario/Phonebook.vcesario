@@ -3,6 +3,8 @@
 - [x] Create contact
 - [x] Remove contact
 - [x] Edit contact
+- [x] Categories
+- [] View contacts
 - [] Send mail
 - [] Send sms
 - [] Validators

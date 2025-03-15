@@ -6,6 +6,14 @@ namespace vcesario.Phonebook;
 
 public class ContactManager
 {
+    enum Category
+    {
+        None = 0,
+        Family = 1,
+        Friends = 2,
+        Work = 3,
+    }
+
     enum MenuOption
     {
         CreateContact,
@@ -89,6 +97,12 @@ public class ContactManager
             return;
         }
 
+        var category = AnsiConsole.Prompt(
+            new SelectionPrompt<Category>()
+            .Title(AppTexts.CREATECONTACT_PROMPT_CATEGORY)
+            .AddChoices(Enum.GetValues<Category>()));
+        Console.WriteLine(string.Format(AppTexts.FIELD_CATEGORY, category));
+
         using (var dbContext = new PhonebookContext())
         {
             try
@@ -97,10 +111,12 @@ public class ContactManager
                 {
                     Name = name,
                     PhoneNumber = phone,
-                    Email = email
+                    Email = email,
+                    Category = (int)category
                 });
                 await dbContext.SaveChangesAsync();
 
+                Console.WriteLine();
                 Console.WriteLine(AppTexts.CREATECONTACT_LOG_ADDED);
                 Console.ReadLine();
             }
@@ -152,11 +168,9 @@ public class ContactManager
                 return;
             }
 
-            AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_NAME, $"[gold3_1]{contact.Name}[/]"));
-            AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_PHONE, $"[gold3_1]{contact.PhoneNumber}[/]"));
-            AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_EMAIL, $"[gold3_1]{(string.IsNullOrEmpty(contact.Email) ? "---" : contact.Email)}[/]"));
+            PrintContact(contact);
 
-            int unalteredFields = 0;
+            bool changedAnyField = false;
             var validator = new UserInputValidator();
 
             Console.WriteLine();
@@ -175,7 +189,10 @@ public class ContactManager
             if (string.IsNullOrEmpty(newName))
             {
                 newName = contact.Name;
-                unalteredFields++;
+            }
+            else if (!newName.Equals(contact.Name))
+            {
+                changedAnyField = true;
             }
 
             var newPhoneNumber = AnsiConsole.Prompt(
@@ -193,7 +210,10 @@ public class ContactManager
             if (string.IsNullOrEmpty(newPhoneNumber))
             {
                 newPhoneNumber = contact.PhoneNumber;
-                unalteredFields++;
+            }
+            else if (!newPhoneNumber.Equals(contact.PhoneNumber))
+            {
+                changedAnyField = true;
             }
 
             var newEmail = AnsiConsole.Prompt(
@@ -211,10 +231,23 @@ public class ContactManager
             if (string.IsNullOrEmpty(newEmail))
             {
                 newEmail = contact.Email;
-                unalteredFields++;
+            }
+            else if (!newEmail.Equals(contact.Email))
+            {
+                changedAnyField = true;
             }
 
-            if (unalteredFields == 3)
+            var newCategory = AnsiConsole.Prompt(
+            new SelectionPrompt<Category>()
+            .Title(AppTexts.EDITCONTACT_PROMPT_NEWCATEGORY)
+            .AddChoices(Enum.GetValues<Category>()));
+
+            if ((int)newCategory != contact.Category)
+            {
+                changedAnyField = true;
+            }
+
+            if (!changedAnyField)
             {
                 continue;
             }
@@ -226,11 +259,13 @@ public class ContactManager
                     contact.Name = newName;
                     contact.PhoneNumber = newPhoneNumber;
                     contact.Email = newEmail;
+                    contact.Category = (int)newCategory;
 
                     dbContext.Update(contact);
 
                     await dbContext.SaveChangesAsync();
 
+                    Console.WriteLine();
                     Console.WriteLine(AppTexts.EDITCONTACT_LOG_UPDATED);
                     Console.ReadLine();
                 }
@@ -282,12 +317,7 @@ public class ContactManager
                 return;
             }
 
-            AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_NAME, $"[gold3_1]{contact.Name}[/]"));
-            AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_PHONE, $"[gold3_1]{contact.PhoneNumber}[/]"));
-            if (!string.IsNullOrEmpty(contact.Email))
-            {
-                AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_EMAIL, $"[gold3_1]{contact.Email}[/]"));
-            }
+            PrintContact(contact);
 
             Console.WriteLine();
             var confirm = AnsiConsole.Prompt(
@@ -345,5 +375,15 @@ public class ContactManager
             case MenuOption.Return: return AppTexts.MENUOPTION_RETURN;
             default: return option.ToString();
         }
+    }
+
+    private void PrintContact(Contact contact)
+    {
+        AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_NAME, $"[gold3_1]{contact.Name}[/]"));
+        AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_PHONE, $"[gold3_1]{contact.PhoneNumber}[/]"));
+        AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_EMAIL, $"[gold3_1]{(string.IsNullOrEmpty(contact.Email) ? "---" : contact.Email)}[/]"));
+        Category contactCategory = (Category)contact.Category;
+        AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_CATEGORY,
+                $"[gold3_1]{(contactCategory == Category.None ? "---" : contactCategory)}[/]"));
     }
 }
