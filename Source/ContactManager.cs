@@ -6,16 +6,19 @@ namespace vcesario.Phonebook;
 
 public class ContactManager
 {
-    enum Category
+    enum CategoryOption
     {
-        None = 0,
-        Family = 1,
-        Friends = 2,
-        Work = 3,
+        None,
+        Family,
+        Friends,
+        Work,
+        All,
+        Return,
     }
 
     enum MenuOption
     {
+        ViewContacts,
         CreateContact,
         EditContact,
         RemoveContact,
@@ -41,6 +44,9 @@ public class ContactManager
 
             switch (chosenOption)
             {
+                case MenuOption.ViewContacts:
+                    await ViewContacts();
+                    break;
                 case MenuOption.CreateContact:
                     await CreateContact();
                     break;
@@ -59,6 +65,14 @@ public class ContactManager
             }
         }
         while (chosenOption != MenuOption.Return);
+    }
+
+    private async Task ViewContacts()
+    {
+        Console.Clear();
+        Console.WriteLine(AppTexts.MENUOPTION_VIEWCONTACTS);
+
+        Console.ReadLine();
     }
 
     private async Task CreateContact()
@@ -98,9 +112,19 @@ public class ContactManager
         }
 
         var category = AnsiConsole.Prompt(
-            new SelectionPrompt<Category>()
+            new SelectionPrompt<CategoryOption>()
             .Title(AppTexts.CREATECONTACT_PROMPT_CATEGORY)
-            .AddChoices(Enum.GetValues<Category>()));
+            .AddChoices([
+                CategoryOption.None,
+                CategoryOption.Family,
+                CategoryOption.Friends,
+                CategoryOption.Work,
+                CategoryOption.Return])
+            .UseConverter(ConvertCategoryOption));
+        if (category == CategoryOption.Return)
+        {
+            return;
+        }
         Console.WriteLine(string.Format(AppTexts.FIELD_CATEGORY, category));
 
         using (var dbContext = new PhonebookContext())
@@ -112,7 +136,7 @@ public class ContactManager
                     Name = name,
                     PhoneNumber = phone,
                     Email = email,
-                    Category = (int)category
+                    Category = category.ToString(),
                 });
                 await dbContext.SaveChangesAsync();
 
@@ -238,11 +262,22 @@ public class ContactManager
             }
 
             var newCategory = AnsiConsole.Prompt(
-            new SelectionPrompt<Category>()
+            new SelectionPrompt<CategoryOption>()
             .Title(AppTexts.EDITCONTACT_PROMPT_NEWCATEGORY)
-            .AddChoices(Enum.GetValues<Category>()));
+            .AddChoices([
+                CategoryOption.None,
+                CategoryOption.Family,
+                CategoryOption.Friends,
+                CategoryOption.Work,
+                CategoryOption.Return])
+            .UseConverter(ConvertCategoryOption));
 
-            if ((int)newCategory != contact.Category)
+            if (newCategory == CategoryOption.Return)
+            {
+                continue;
+            }
+
+            if (!contact.Category.Equals(newCategory.ToString()))
             {
                 changedAnyField = true;
             }
@@ -259,7 +294,7 @@ public class ContactManager
                     contact.Name = newName;
                     contact.PhoneNumber = newPhoneNumber;
                     contact.Email = newEmail;
-                    contact.Category = (int)newCategory;
+                    contact.Category = newCategory.ToString();
 
                     dbContext.Update(contact);
 
@@ -369,6 +404,7 @@ public class ContactManager
     {
         switch (option)
         {
+            case MenuOption.ViewContacts: return AppTexts.MENUOPTION_VIEWCONTACTS;
             case MenuOption.CreateContact: return AppTexts.MENUOPTION_CREATECONTACT;
             case MenuOption.EditContact: return AppTexts.MENUOPTION_EDITCONTACT;
             case MenuOption.RemoveContact: return AppTexts.MENUOPTION_REMOVECONTACT;
@@ -377,13 +413,29 @@ public class ContactManager
         }
     }
 
+    private string ConvertCategoryOption(CategoryOption category)
+    {
+        if (category == CategoryOption.Return)
+        {
+            return AppTexts.MENUOPTION_RETURN;
+        }
+
+        return category.ToString();
+    }
+
     private void PrintContact(Contact contact)
     {
         AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_NAME, $"[gold3_1]{contact.Name}[/]"));
         AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_PHONE, $"[gold3_1]{contact.PhoneNumber}[/]"));
-        AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_EMAIL, $"[gold3_1]{(string.IsNullOrEmpty(contact.Email) ? "---" : contact.Email)}[/]"));
-        Category contactCategory = (Category)contact.Category;
-        AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_CATEGORY,
-                $"[gold3_1]{(contactCategory == Category.None ? "---" : contactCategory)}[/]"));
+        AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_EMAIL,
+            $"[gold3_1]{(string.IsNullOrEmpty(contact.Email) ? "---" : contact.Email)}[/]"));
+        if (Enum.TryParse<CategoryOption>(contact.Category, true, out var category) && category != CategoryOption.None)
+        {
+            AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_PHONE, $"[gold3_1]{category}[/]"));
+        }
+        else
+        {
+            AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_CATEGORY, $"[gold3_1]---[/]"));
+        }
     }
 }

@@ -31,6 +31,7 @@ public static class AppTexts
     public const string MENUOPTION_SENDSMS = "Send SMS";
     public const string MENUOPTION_MANAGECONTACTS = "Manage contacts";
     public const string MENUOPTION_EXIT = "[grey]Exit[/]";
+    public const string MENUOPTION_VIEWCONTACTS = "View contacts";
     public const string MENUOPTION_CREATECONTACT = "Add new contact";
     public const string MENUOPTION_EDITCONTACT = "Edit contact";
     public const string MENUOPTION_REMOVECONTACT = "Remove contact";
