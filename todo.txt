@@ -4,7 +4,7 @@
 - [x] Remove contact
 - [x] Edit contact
 - [x] Categories
-- [] View contacts
+- [x] View contacts
 - [] Send mail
 - [] Send sms
 - [] Validators
