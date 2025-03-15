@@ -10,8 +10,19 @@ public class UserInputValidator
         AnsiConsole.MarkupLine("[green]Todo: Validate unique name[/]");
         return ValidationResult.Success();
     }
+    public ValidationResult ValidateUniqueNameEmptyOrPeriod(string input)
+    {
+        AnsiConsole.MarkupLine("[green]Todo: Validate unique name[/]");
+        return ValidationResult.Success();
+    }
 
     public ValidationResult ValidatePhoneNumberOrPeriod(string input)
+    {
+        AnsiConsole.MarkupLine("[green]Todo: Validate phone number[/]");
+        return ValidationResult.Success();
+    }
+
+    public ValidationResult ValidatePhoneNumberEmptyOrPeriod(string input)
     {
         AnsiConsole.MarkupLine("[green]Todo: Validate phone number[/]");
         return ValidationResult.Success();

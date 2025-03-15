@@ -2,7 +2,7 @@
 - [x] Setup EF + SQL Server, create Contacts table
 - [x] Create contact
 - [x] Remove contact
-- [] Edit contact
+- [x] Edit contact
 - [] Send mail
 - [] Send sms
 - [] Validators

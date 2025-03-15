@@ -36,6 +36,9 @@ public class ContactManager
                 case MenuOption.CreateContact:
                     await CreateContact();
                     break;
+                case MenuOption.EditContact:
+                    await EditContact();
+                    break;
                 case MenuOption.RemoveContact:
                     await RemoveContact();
                     break;
@@ -109,6 +112,138 @@ public class ContactManager
         }
     }
 
+    private async Task EditContact()
+    {
+        Console.Clear();
+        Console.WriteLine(AppTexts.MENUOPTION_EDITCONTACT);
+
+        List<Contact> contacts;
+        using (var dbContext = new PhonebookContext())
+        {
+            try
+            {
+                contacts = await dbContext.Contacts.OrderBy(c => c.Id).ToListAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                Console.ReadLine();
+                return;
+            }
+        }
+
+        do
+        {
+            Console.Clear();
+            Console.WriteLine(AppTexts.MENUOPTION_EDITCONTACT);
+            AnsiConsole.MarkupLine($"[grey]{AppTexts.TOOLTIP_CANCEL}[/]");
+            AnsiConsole.MarkupLine($"[grey]{AppTexts.TOOLTIP_KEEP}[/]");
+
+            var prompt = new SelectionPrompt<Contact>()
+                .Title(AppTexts.EDITCONTACT_PROMPT_SELECT)
+                .AddChoices(contacts)
+                .UseConverter(c => c.Name);
+            prompt.AddChoice(new Contact() { Id = -1, Name = AppTexts.MENUOPTION_RETURN });
+
+            Console.WriteLine();
+            var contact = AnsiConsole.Prompt(prompt);
+            if (contact.Id == -1)
+            {
+                return;
+            }
+
+            AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_NAME, $"[gold3_1]{contact.Name}[/]"));
+            AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_PHONE, $"[gold3_1]{contact.PhoneNumber}[/]"));
+            AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_EMAIL, $"[gold3_1]{(string.IsNullOrEmpty(contact.Email) ? "---" : contact.Email)}[/]"));
+
+            int unalteredFields = 0;
+            var validator = new UserInputValidator();
+
+            Console.WriteLine();
+            var newName = AnsiConsole.Prompt(
+                new TextPrompt<string>(AppTexts.EDITCONTACT_PROMPT_NEWNAME)
+                {
+                    AllowEmpty = true
+                }
+                .Validate(validator.ValidateUniqueNameEmptyOrPeriod));
+
+            if (newName.Equals("."))
+            {
+                continue;
+            }
+
+            if (string.IsNullOrEmpty(newName))
+            {
+                newName = contact.Name;
+                unalteredFields++;
+            }
+
+            var newPhoneNumber = AnsiConsole.Prompt(
+                new TextPrompt<string>(AppTexts.EDITCONTACT_PROMPT_NEWPHONE)
+                {
+                    AllowEmpty = true
+                }
+                .Validate(validator.ValidatePhoneNumberEmptyOrPeriod));
+
+            if (newPhoneNumber.Equals("."))
+            {
+                continue;
+            }
+
+            if (string.IsNullOrEmpty(newPhoneNumber))
+            {
+                newPhoneNumber = contact.PhoneNumber;
+                unalteredFields++;
+            }
+
+            var newEmail = AnsiConsole.Prompt(
+                            new TextPrompt<string>(AppTexts.EDITCONTACT_PROMPT_NEWEMAIL)
+                            {
+                                AllowEmpty = true
+                            }
+                            .Validate(validator.ValidateEmailEmptyOrPeriod));
+
+            if (newEmail.Equals("."))
+            {
+                continue;
+            }
+
+            if (string.IsNullOrEmpty(newEmail))
+            {
+                newEmail = contact.Email;
+                unalteredFields++;
+            }
+
+            if (unalteredFields == 3)
+            {
+                continue;
+            }
+
+            using (var dbContext = new PhonebookContext())
+            {
+                try
+                {
+                    contact.Name = newName;
+                    contact.PhoneNumber = newPhoneNumber;
+                    contact.Email = newEmail;
+
+                    dbContext.Update(contact);
+
+                    await dbContext.SaveChangesAsync();
+
+                    Console.WriteLine(AppTexts.EDITCONTACT_LOG_UPDATED);
+                    Console.ReadLine();
+                }
+                catch (DbUpdateException ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                    Console.ReadLine();
+                }
+            }
+        }
+        while (true);
+    }
+
     private async Task RemoveContact()
     {
         Console.Clear();
@@ -147,11 +282,11 @@ public class ContactManager
                 return;
             }
 
-            AnsiConsole.MarkupLine(string.Format(AppTexts.REMOVECONTACT_FIELD_NAME, $"[gold3_1]{contact.Name}[/]"));
-            AnsiConsole.MarkupLine(string.Format(AppTexts.REMOVECONTACT_FIELD_PHONE, $"[gold3_1]{contact.PhoneNumber}[/]"));
+            AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_NAME, $"[gold3_1]{contact.Name}[/]"));
+            AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_PHONE, $"[gold3_1]{contact.PhoneNumber}[/]"));
             if (!string.IsNullOrEmpty(contact.Email))
             {
-                AnsiConsole.MarkupLine(string.Format(AppTexts.REMOVECONTACT_FIELD_EMAIL, $"[gold3_1]{contact.Email}[/]"));
+                AnsiConsole.MarkupLine(string.Format(AppTexts.FIELD_EMAIL, $"[gold3_1]{contact.Email}[/]"));
             }
 
             Console.WriteLine();
