@@ -101,12 +101,12 @@ public class ContactManager
                 {
                     if (category == CategoryOption.All)
                     {
-                        contacts = await dbContext.Contacts.ToListAsync();
+                        contacts = await dbContext.Contacts.OrderBy(c => c.Name).ToListAsync();
                     }
                     else
                     {
                         string categoryStr = category.ToString();
-                        contacts = await dbContext.Contacts.Where(c => c.Category.Equals(categoryStr)).ToListAsync();
+                        contacts = await dbContext.Contacts.Where(c => c.Category.Equals(categoryStr)).OrderBy(c => c.Name).ToListAsync();
                     }
                 }
                 catch (DbUpdateException ex)
@@ -223,7 +223,7 @@ public class ContactManager
         {
             try
             {
-                contacts = await dbContext.Contacts.OrderBy(c => c.Id).ToListAsync();
+                contacts = await dbContext.Contacts.OrderBy(c => c.Name).ToListAsync();
             }
             catch (DbUpdateException ex)
             {

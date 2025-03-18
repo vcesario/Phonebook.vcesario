@@ -28,6 +28,11 @@ public class UserInputValidator
         return ValidationResult.Success();
     }
 
+    public ValidationResult ValidateEmailOrPeriod(string input)
+    {
+        AnsiConsole.MarkupLine("[green]Todo: Validate email[/]");
+        return ValidationResult.Success();
+    }
     public ValidationResult ValidateEmailEmptyOrPeriod(string input)
     {
         AnsiConsole.MarkupLine("[green]Todo: Validate email[/]");

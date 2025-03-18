@@ -35,6 +35,9 @@ public static class MainApplication
 
             switch (chosenOption)
             {
+                case MenuOption.SendMail:
+                    await new Mailer().Open();
+                    break;
                 case MenuOption.ManageContacts:
                     await new ContactManager().Open();
                     break;
