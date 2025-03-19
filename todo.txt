@@ -5,6 +5,6 @@
 - [x] Edit contact
 - [x] Categories
 - [x] View contacts
-- [] Send mail
+- [x] Send mail
 - [] Send sms
 - [] Validators

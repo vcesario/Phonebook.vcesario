@@ -3,6 +3,7 @@ public static class AppTexts
     public const string PROMPT_ACTION = "What do you want to do?";
     public const string PROMPT_CATEGORY = "Choose a contact category:";
     public const string PROMPT_RECONFIRM = "Are you REALLY sure?";
+    public const string PROMPT_CHOOSECONTACT = "Choose a contact to send your message to:";
     public const string APP_TITLE = "===== PHONEBOOK =====";
     public const string TOOLTIP_CANCEL = "Enter '.' anywhere to cancel.";
     public const string TOOLTIP_KEEP = "Leave field blank to keep it";
@@ -30,6 +31,26 @@ public static class AppTexts
     public const string REMOVECONTACT_PROMPT_SELECT = "Which contact do you want to remove?";
     public const string REMOVECONTACT_PROMPT_REMOVE = "Are you sure you want to remove this contact?";
     public const string REMOVECONTACT_LOG_REMOVED = "Contact removed.";
+
+    public const string MAILER_DISCLAIMER = "This application uses [indianred]Twilio's Sendgrid[/]."
+                                            + "\nYou'll need to provide a SendGrid API Key,"
+                                            + "\nalong with the sender's name and email.";
+    public const string MAILER_DISCLAIMER_HEADER = "Disclaimer";
+    public const string MAILER_PROMPT_APIKEY = "Enter SendGrid API Key:";
+    public const string MAILER_PROMPT_SENDERNAME = "Enter sender name:";
+    public const string MAILER_PROMPT_SENDEREMAIL = "Enter sender email:";
+    public const string MAILER_PROMPT_SUBJECT = "Enter email subject:";
+    public const string MAILER_PROMPT_MESSAGE = "Enter message:";
+    public const string MAILER_LABEL_PREVIEW = "Mail preview";
+    public const string MAILER_SENDCONFIRM = "Send message?";
+    public const string MAILER_LOG_CANCELLED = "Message discarded.";
+    public const string MAILER_LOG_SUCCESS = "Message sent successfully.";
+    public const string MAILER_FIELD_CONTACT = "Contact";
+    public const string MAILER_FIELD_APIKEY = "SendGrid API Key";
+    public const string MAILER_FIELD_FROM = "From";
+    public const string MAILER_FIELD_TO = "To";
+    public const string MAILER_FIELD_SUBJECT = "Subject";
+    public const string MAILER_FIELD_MESSAGE = "Message";
 
     public const string MENUOPTION_SENDMAIL = "Send mail";
     public const string MENUOPTION_SENDSMS = "Send SMS";

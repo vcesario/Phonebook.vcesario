@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 using Spectre.Console;
 using vcesario.Flashcards;
 
@@ -10,11 +12,9 @@ public class Mailer
         Console.WriteLine(AppTexts.MENUOPTION_SENDMAIL);
         AnsiConsole.MarkupLine($"[grey]{AppTexts.TOOLTIP_CANCEL}[/]");
 
-        var panel = new Panel("This application uses [indianred]Twilio's Sendgrid[/]."
-                                + "\nYou'll need to provide a SendGrid API Key,"
-                                + "\nalong with the sender's name and email.")
+        var panel = new Panel(AppTexts.MAILER_DISCLAIMER)
         {
-            Header = new PanelHeader("[gold3_1]Disclaimer[/]"),
+            Header = new PanelHeader($"[gold3_1]{AppTexts.MAILER_DISCLAIMER_HEADER}[/]"),
             Border = BoxBorder.Double,
             Padding = new Padding(2, 1, 2, 1)
         };
@@ -23,13 +23,13 @@ public class Mailer
         AnsiConsole.Write(panel);
 
         Console.WriteLine();
-        var apiKey = AnsiConsole.Prompt(new TextPrompt<string>("Enter SendGrid API Key:"));
+        var apiKey = AnsiConsole.Prompt(new TextPrompt<string>(AppTexts.MAILER_PROMPT_APIKEY));
         if (apiKey.Equals("."))
         {
             return;
         }
 
-        var senderName = AnsiConsole.Prompt(new TextPrompt<string>("Enter sender name:"));
+        var senderName = AnsiConsole.Prompt(new TextPrompt<string>(AppTexts.MAILER_PROMPT_SENDERNAME));
         if (senderName.Equals("."))
         {
             return;
@@ -37,7 +37,7 @@ public class Mailer
 
         var validator = new UserInputValidator();
         var senderEmail = AnsiConsole.Prompt(
-            new TextPrompt<string>("Enter sender email:")
+            new TextPrompt<string>(AppTexts.MAILER_PROMPT_SENDEREMAIL)
             .Validate(validator.ValidateEmailOrPeriod));
         if (senderEmail.Equals("."))
         {
@@ -60,7 +60,7 @@ public class Mailer
         }
 
         var prompt = new SelectionPrompt<Contact>()
-            .Title("Choose a contact to send your email to:")
+            .Title(AppTexts.PROMPT_CHOOSECONTACT)
             .AddChoices(contacts)
             .UseConverter(c => c.Name);
         prompt.AddChoice(new Contact() { Id = -1, Name = AppTexts.MENUOPTION_RETURN });
@@ -72,42 +72,69 @@ public class Mailer
         {
             return;
         }
-        Console.WriteLine($"Contact: {contact.Name} <{contact.Email}>");
+        Console.WriteLine($"{AppTexts.MAILER_FIELD_CONTACT}: {contact.Name} <{contact.Email}>");
 
         // ask for subject
-        var subject = AnsiConsole.Prompt(new TextPrompt<string>("Enter email subject:"));
+        var subject = AnsiConsole.Prompt(new TextPrompt<string>(AppTexts.MAILER_PROMPT_SUBJECT));
         // ask for message
-        var message = AnsiConsole.Prompt(new TextPrompt<string>("Enter message:\n\n"));
+        var mailContent = AnsiConsole.Prompt(new TextPrompt<string>(AppTexts.MAILER_PROMPT_MESSAGE));
 
         // print message
         Console.Clear();
         Console.WriteLine(AppTexts.MENUOPTION_SENDMAIL);
-        Console.WriteLine("Mail preview");
+        Console.WriteLine(AppTexts.MAILER_LABEL_PREVIEW);
 
         Console.WriteLine();
-        Console.WriteLine($"SendGrid API Key: {apiKey}");
-        Console.WriteLine($"From: {senderName} <{senderEmail}>");
-        Console.WriteLine($"To: {contact.Name} <{contact.Email}>");
-        Console.WriteLine($"Subject: {subject}");
-        Console.WriteLine($"Message:\n\n{message}");
+        Console.WriteLine($"{AppTexts.MAILER_FIELD_APIKEY}: {apiKey}");
+        Console.WriteLine($"{AppTexts.MAILER_FIELD_FROM}: {senderName} <{senderEmail}>");
+        Console.WriteLine($"{AppTexts.MAILER_FIELD_TO}: {contact.Name} <{contact.Email}>");
+        Console.WriteLine($"{AppTexts.MAILER_FIELD_SUBJECT}: {subject}");
+        Console.WriteLine($"{AppTexts.MAILER_FIELD_MESSAGE}:\n\n{mailContent}");
         Console.WriteLine();
 
         // send?
         Console.WriteLine();
         var confirmation = AnsiConsole.Prompt(
-            new ConfirmationPrompt("Send message?")
+            new ConfirmationPrompt(AppTexts.MAILER_SENDCONFIRM)
             {
                 DefaultValue = false
             });
 
         if (!confirmation)
         {
-            Console.WriteLine("Message discarded.");
+            Console.WriteLine(AppTexts.MAILER_LOG_CANCELLED);
             Console.ReadLine();
             return;
         }
 
         // try send, log result
-        // ...
+        var client = new SendGridClient(apiKey);
+        var from = new EmailAddress(senderEmail, senderName);
+        var to = new EmailAddress(contact.Email, contact.Name);
+        var message = MailHelper.CreateSingleEmail(
+            from,
+            to,
+            subject,
+            mailContent,
+            mailContent
+        );
+
+        var response = await client.SendEmailAsync(message);
+
+        switch ((int)response.StatusCode)
+        {
+            case 200:
+            case 201:
+            case 204:
+                Console.WriteLine();
+                AnsiConsole.MarkupLine($"[green]{AppTexts.MAILER_LOG_SUCCESS}[/]");
+                Console.ReadLine();
+                break;
+            default:
+                Console.WriteLine();
+                Console.WriteLine($"Error: {response.StatusCode} ({(int)response.StatusCode})");
+                Console.ReadLine();
+                break;
+        }
     }
 }
