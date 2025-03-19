@@ -4,7 +4,11 @@ public static class AppTexts
     public const string PROMPT_CATEGORY = "Choose a contact category:";
     public const string PROMPT_RECONFIRM = "Are you REALLY sure?";
     public const string PROMPT_CHOOSECONTACT = "Choose a contact to send your message to:";
-    public const string APP_TITLE = "===== PHONEBOOK =====";
+    public const string PROMPT_MESSAGE = "Enter message:";
+    public const string PROMPT_CONFIRMMESSAGE = "Send message?";
+    public const string LABEL_APPTITLE = "===== PHONEBOOK =====";
+    public const string LABEL_MESSAGEPREVIEW = "Message preview";
+    public const string LOG_MESSAGECANCELLED = "Message discarded.";
     public const string TOOLTIP_CANCEL = "Enter '.' anywhere to cancel.";
     public const string TOOLTIP_KEEP = "Leave field blank to keep it";
     public const string TOOLTIP_KEYTORETURN = "Press any key to return.";
@@ -12,6 +16,9 @@ public static class AppTexts
     public const string FIELD_PHONE = "Phone number";
     public const string FIELD_EMAIL = "E-mail";
     public const string FIELD_CATEGORY = "Category";
+    public const string FIELD_CONTACT = "Contact";
+    public const string FIELD_TO = "To";
+    public const string FIELD_MESSAGE = "Message";
 
     public const string VIEWCONTACTS_LOG_NONE = "No contacts found.";
     public const string VIEWCONTACTS_LABEL_VIEWCATEGORY = "Viewing contacts: {0}";
@@ -40,17 +47,12 @@ public static class AppTexts
     public const string MAILER_PROMPT_SENDERNAME = "Enter sender name:";
     public const string MAILER_PROMPT_SENDEREMAIL = "Enter sender email:";
     public const string MAILER_PROMPT_SUBJECT = "Enter email subject:";
-    public const string MAILER_PROMPT_MESSAGE = "Enter message:";
-    public const string MAILER_LABEL_PREVIEW = "Mail preview";
-    public const string MAILER_SENDCONFIRM = "Send message?";
-    public const string MAILER_LOG_CANCELLED = "Message discarded.";
     public const string MAILER_LOG_SUCCESS = "Message sent successfully.";
-    public const string MAILER_FIELD_CONTACT = "Contact";
     public const string MAILER_FIELD_APIKEY = "SendGrid API Key";
     public const string MAILER_FIELD_FROM = "From";
-    public const string MAILER_FIELD_TO = "To";
     public const string MAILER_FIELD_SUBJECT = "Subject";
-    public const string MAILER_FIELD_MESSAGE = "Message";
+
+    public const string SMS_LOG_SUCCESS = "SMS won't be sent due to API not implemented. Consider success!";
 
     public const string MENUOPTION_SENDMAIL = "Send mail";
     public const string MENUOPTION_SENDSMS = "Send SMS";

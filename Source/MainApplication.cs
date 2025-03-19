@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Spectre.Console;
 
@@ -23,7 +22,7 @@ public static class MainApplication
         {
             Console.Clear();
 
-            AnsiConsole.MarkupLine($"[darkmagenta]{AppTexts.APP_TITLE}[/]");
+            AnsiConsole.MarkupLine($"[darkmagenta]{AppTexts.LABEL_APPTITLE}[/]");
 
             Console.WriteLine();
             chosenOption = AnsiConsole.Prompt(
@@ -38,6 +37,9 @@ public static class MainApplication
                 case MenuOption.SendMail:
                     await new Mailer().Open();
                     break;
+                case MenuOption.SendSms:
+                    await SendSms();
+                    break;
                 case MenuOption.ManageContacts:
                     await new ContactManager().Open();
                     break;
@@ -50,6 +52,75 @@ public static class MainApplication
             }
         }
         while (chosenOption != MenuOption.Exit);
+    }
+
+    private static async Task SendSms()
+    {
+        Console.Clear();
+        Console.WriteLine(AppTexts.MENUOPTION_SENDSMS);
+        AnsiConsole.MarkupLine($"[grey]{AppTexts.TOOLTIP_CANCEL}[/]");
+
+        List<Contact> contacts;
+        using (var dbContext = new PhonebookContext())
+        {
+            try
+            {
+                contacts = await dbContext.Contacts.Where(c => !string.IsNullOrEmpty(c.PhoneNumber)).OrderBy(c => c.Name).ToListAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                Console.ReadLine();
+                return;
+            }
+        }
+
+        var prompt = new SelectionPrompt<Contact>()
+            .Title(AppTexts.PROMPT_CHOOSECONTACT)
+            .AddChoices(contacts)
+            .UseConverter(c => c.Name);
+        prompt.AddChoice(new Contact() { Id = -1, Name = AppTexts.MENUOPTION_RETURN });
+
+        Console.WriteLine();
+        var contact = AnsiConsole.Prompt(prompt);
+
+        if (contact.Id == -1)
+        {
+            return;
+        }
+        Console.WriteLine($"{AppTexts.FIELD_CONTACT}: {contact.Name} <{contact.Email}>");
+
+        var content = AnsiConsole.Prompt(new TextPrompt<string>(AppTexts.PROMPT_MESSAGE));
+        if (content.Equals("."))
+        {
+            return;
+        }
+
+        Console.Clear();
+        Console.WriteLine(AppTexts.MENUOPTION_SENDSMS);
+        Console.WriteLine(AppTexts.LABEL_MESSAGEPREVIEW);
+
+        Console.WriteLine();
+        Console.WriteLine($"{AppTexts.FIELD_TO}: {contact.Name} <{contact.PhoneNumber}>");
+        Console.WriteLine($"{AppTexts.FIELD_MESSAGE}:\n\n{content}");
+
+        Console.WriteLine();
+        var confirmation = AnsiConsole.Prompt(
+            new ConfirmationPrompt(AppTexts.PROMPT_CONFIRMMESSAGE)
+            {
+                DefaultValue = false
+            });
+
+        if (!confirmation)
+        {
+            Console.WriteLine(AppTexts.LOG_MESSAGECANCELLED);
+            Console.ReadLine();
+            return;
+        }
+
+        Console.WriteLine();
+        AnsiConsole.MarkupLine($"[orange3]{AppTexts.SMS_LOG_SUCCESS}[/]");
+        Console.ReadLine();
     }
 
     private static string ConvertMenuOption(MenuOption option)

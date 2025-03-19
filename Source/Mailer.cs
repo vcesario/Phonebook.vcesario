@@ -72,37 +72,45 @@ public class Mailer
         {
             return;
         }
-        Console.WriteLine($"{AppTexts.MAILER_FIELD_CONTACT}: {contact.Name} <{contact.Email}>");
+        Console.WriteLine($"{AppTexts.FIELD_CONTACT}: {contact.Name} <{contact.Email}>");
 
         // ask for subject
         var subject = AnsiConsole.Prompt(new TextPrompt<string>(AppTexts.MAILER_PROMPT_SUBJECT));
+        if (subject.Equals("."))
+        {
+            return;
+        }
+
         // ask for message
-        var mailContent = AnsiConsole.Prompt(new TextPrompt<string>(AppTexts.MAILER_PROMPT_MESSAGE));
+        var content = AnsiConsole.Prompt(new TextPrompt<string>(AppTexts.PROMPT_MESSAGE));
+        if (content.Equals("."))
+        {
+            return;
+        }
 
         // print message
         Console.Clear();
         Console.WriteLine(AppTexts.MENUOPTION_SENDMAIL);
-        Console.WriteLine(AppTexts.MAILER_LABEL_PREVIEW);
+        Console.WriteLine(AppTexts.LABEL_MESSAGEPREVIEW);
 
         Console.WriteLine();
         Console.WriteLine($"{AppTexts.MAILER_FIELD_APIKEY}: {apiKey}");
         Console.WriteLine($"{AppTexts.MAILER_FIELD_FROM}: {senderName} <{senderEmail}>");
-        Console.WriteLine($"{AppTexts.MAILER_FIELD_TO}: {contact.Name} <{contact.Email}>");
+        Console.WriteLine($"{AppTexts.FIELD_TO}: {contact.Name} <{contact.Email}>");
         Console.WriteLine($"{AppTexts.MAILER_FIELD_SUBJECT}: {subject}");
-        Console.WriteLine($"{AppTexts.MAILER_FIELD_MESSAGE}:\n\n{mailContent}");
-        Console.WriteLine();
+        Console.WriteLine($"{AppTexts.FIELD_MESSAGE}:\n\n{content}");
 
         // send?
         Console.WriteLine();
         var confirmation = AnsiConsole.Prompt(
-            new ConfirmationPrompt(AppTexts.MAILER_SENDCONFIRM)
+            new ConfirmationPrompt(AppTexts.PROMPT_CONFIRMMESSAGE)
             {
                 DefaultValue = false
             });
 
         if (!confirmation)
         {
-            Console.WriteLine(AppTexts.MAILER_LOG_CANCELLED);
+            Console.WriteLine(AppTexts.LOG_MESSAGECANCELLED);
             Console.ReadLine();
             return;
         }
@@ -115,8 +123,8 @@ public class Mailer
             from,
             to,
             subject,
-            mailContent,
-            mailContent
+            content,
+            content
         );
 
         var response = await client.SendEmailAsync(message);

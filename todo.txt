@@ -6,5 +6,5 @@
 - [x] Categories
 - [x] View contacts
 - [x] Send mail
-- [] Send sms
+- [x] Send sms
 - [] Validators
