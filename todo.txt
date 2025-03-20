@@ -7,4 +7,5 @@
 - [x] View contacts
 - [x] Send mail
 - [x] Send sms
-- [] Validators
+- [x] Validators
+- [] Readme, Last look, Fix directory

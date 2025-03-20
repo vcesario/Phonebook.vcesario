@@ -1,4 +1,5 @@
-using System.Threading.Tasks;
+using System.Net.Mail;
+using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Spectre.Console;
 
@@ -8,6 +9,11 @@ public class UserInputValidator
 {
     public ValidationResult ValidateUniqueNameOrPeriod(string input)
     {
+        if (input.Equals("."))
+        {
+            return ValidationResult.Success();
+        }
+
         using (var dbContext = new PhonebookContext())
         {
             try
@@ -42,8 +48,18 @@ public class UserInputValidator
 
     public ValidationResult ValidatePhoneNumberOrPeriod(string input)
     {
-        AnsiConsole.MarkupLine("[green]Todo: Validate phone number[/]");
-        return ValidationResult.Success();
+        if (input.Equals("."))
+        {
+            return ValidationResult.Success();
+        }
+
+        string pattern = @"^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$";
+        if (Regex.IsMatch(input, pattern))
+        {
+            return ValidationResult.Success();
+        }
+
+        return ValidationResult.Error("[grey]Use specified format: (XXX) XXX-XXXX[/]");
     }
 
     public ValidationResult ValidatePhoneNumberEmptyOrPeriod(string input)
@@ -58,7 +74,24 @@ public class UserInputValidator
 
     public ValidationResult ValidateEmailOrPeriod(string input)
     {
-        AnsiConsole.MarkupLine("[green]Todo: Validate email[/]");
+        if (input.Equals("."))
+        {
+            return ValidationResult.Success();
+        }
+
+        try
+        {
+            MailAddress address = new(input);
+            if (!address.Address.Equals(input))
+            {
+                return ValidationResult.Error("[grey]E-mail format not accepted.[/]");
+            }
+        }
+        catch (FormatException ex)
+        {
+            return ValidationResult.Error(ex.Message);
+        }
+
         return ValidationResult.Success();
     }
 
