@@ -8,4 +8,4 @@
 - [x] Send mail
 - [x] Send sms
 - [x] Validators
-- [] Readme, Last look, Fix directory
+- [x] Readme, Last look, Fix directory
